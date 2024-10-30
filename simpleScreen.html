@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="css/main.css" >
+
+    <title>Temperture monitor</title>
+  </head>
+  <body>
+    <div class="container">
+        <div id="fullscreen-clock">
+            <div class="headwrapper">
+                <div id="date" class='grow'></div>
+                <div id="clock" class='grow'></div>
+                <div id="rain" class='grow' style='display:none'></div>
+            </div>
+            <div id="temp">
+                <div id="inside" class='grow'>
+                    <div class='location'>
+                        <div class='min'>
+                            <div class="min-temp"></div>
+                            <div class="min-time"></div>
+                        </div>
+                        <div>Inside</div>
+                        <div class='max'>
+                            <div class="max-temp"></div>
+                            <div class="max-time"></div>
+                        </div>
+                    </div>
+                    <div class='tempwrapper'>
+                        <span class='temp'></span>°C
+                    </div>
+                    <div class='humwrapper'>
+                        <span class='hum'></span>%
+                    </div>
+                </div>
+                <div id="outside" class='grow'>
+                    <div class='location'>
+                        <div class='min'>
+                            <div class="min-temp"></div>
+                            <div class="min-time"></div>
+                        </div>
+                        <span>Outside</span>
+                        <div class='max'>
+                            <div class="max-temp"></div>
+                            <div class="max-time"></div>
+                        </div>
+                    </div>
+                    <div class='tempwrapper'>
+                        <span class='temp'></span>°C
+                    </div>
+                    <div class='humwrapper'>
+                        <span class='hum'></span>%
+                    </div>
+                </div>
+            </div>
+        </div>
+
+      <script src="js/secrets.js"></script>
+      <script src="js/main.min.js"></script>
+
+    </div>
+  </body>
+</html>

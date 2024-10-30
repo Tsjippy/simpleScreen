@@ -1,0 +1,18 @@
+{
+  "name": "main",
+  "version": "1.0.0",
+  "description": "Main JS",
+  "main": "./main.js",
+  "scripts": {
+    "build": "webpack --watch --entry ./main.js --output-path . --output-filename main.min.js --progress --mode=production --devtool source-map"
+  },
+  "author": "Ewald Harmsen",
+  "license": "ISC",
+  "dependencies": {
+    "home-assistant-js-websocket": "^9.4.0",
+    "webpack": "^5.95.0"
+  },
+  "devDependencies": {
+    "webpack-cli": "^5.1.4"
+  }
+}
