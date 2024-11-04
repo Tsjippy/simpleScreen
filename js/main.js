@@ -14,7 +14,7 @@ import {
 import './secrets.js';
 
 let unsubEntities;
-var connection      = 'hello';
+var connection      = '';
 
 async function authenticate(){
     let auth;
@@ -131,23 +131,6 @@ function renderEntities(connection, entities) {
         }else if( entId == 'sensor.pws_rainrate'){
             rainRate    = entities[entId].state;
         }
-        
-        /* if (
-            ["switch", "light", "input_boolean"].includes(
-            entId.split(".", 1)[0],
-            )
-        ) {
-            const button = document.createElement("button");
-            button.innerHTML = "toggle";
-            button.onclick = () =>
-            callService(connection, "homeassistant", "toggle", {
-                entity_id: entId,
-            });
-            tdState.appendChild(button);
-        }
-        tr.appendChild(tdState);
-
-        root.appendChild(tr); */
     });
 
     if( rain > 0 && rainRate > -1){
@@ -162,9 +145,7 @@ function setDateTime() {
     const today     = new Date();
     let h           = today.getHours();
     let m           = today.getMinutes();
-    let s           = today.getSeconds();
     m               = addLeadingZeros(m);
-    s               = addLeadingZeros(s);
 
     let dateString  = `${today.getDate()}-${today.getMonth()+1}-${today.getFullYear()}`;
 
@@ -202,7 +183,7 @@ function checkTimedOut(entity, selector){
 
     let timedOut    = false;
 
-    if(minutes > 15){
+    if(minutes > 180){
         timedOut    = true;
     }
 
@@ -255,16 +236,16 @@ function detectDoubleTap(doubleTapMs) {
         const tapLength   = currentTime - lastTap;
 
         if (0 < tapLength && tapLength < doubleTapMs) {
-        event.preventDefault();
+            event.preventDefault();
 
-        const doubleTap = new CustomEvent("doubletap", {
-            bubbles: true,
-            detail: event
-        });
+            const doubleTap = new CustomEvent("doubletap", {
+                bubbles: true,
+                detail: event
+            });
 
-        event.target.dispatchEvent(doubleTap)
+            event.target.dispatchEvent(doubleTap)
         } else {
-        timeout = setTimeout(() => clearTimeout(timeout), doubleTapMs)
+            timeout = setTimeout(() => clearTimeout(timeout), doubleTapMs)
         }
         lastTap = currentTime
     }
@@ -282,22 +263,9 @@ window.setupEntitiesSubscription = async () => {
     );
 };
 
-
-/* console.log(connection)
-
-test = await websocket_api.websocket_command(
-    {
-        "id": 1,
-        "type": "subscribe_entities",
-        "entity_ids": [
-          "light.my_light"
-        ]
-      }
-);
-
-console.log(test); */
-
+// Update the time every minute
 setDateTime();
+setInterval(setDateTime, 60000);
 
 if(typeof(HA_INSTANCE) != 'undefined'){
     console.log('Logging in with long live access token');
@@ -319,9 +287,19 @@ setupEntitiesSubscription();
 // initialize the new event
 document.addEventListener('pointerup', detectDoubleTap(500));
 
-// put the addEventListener on some tag
+// Listen to two taps on the screen
 document.addEventListener('doubletap', (event) => {
     callService(connection, "homeassistant", "toggle", {
         entity_id: 'switch.woonkamer_lamp_switch_0',
     });
+
+    callService(connection, "homeassistant", "toggle", {
+        entity_id: 'switch.smart_plug_3_socket_1',
+    });
+
+    callService(connection, "homeassistant", "toggle", {
+        entity_id: 'device_tracker.staande_lamp_2',
+    });
 });
+
+window.scrollTo(0, 0);
