@@ -14,7 +14,26 @@ import {
 import './secrets.js';
 
 let unsubEntities;
-var connection      = '';
+var connection          = '';
+var playing             = false;
+var playStateChanged    = false;
+ 
+// Only check the ones we are interested in 
+var entIds          = [
+    'sensor.pws_temperature',
+    'sensor.pws_temperature_indoor',
+    'sensor.pws_humidity_indoor',
+    'sensor.pws_humidity',
+    'sensor.maximum_temperature_outside',
+    'sensor.minimum_temperature_outside',
+    'sensor.maximum_temperature_inside',
+    'sensor.minimum_temperature_inside',
+    'sensor.pws_rain',
+    'sensor.pws_rainrate',
+    'media_player.allemaal',
+    'media_player.keuken',
+    'media_player.woonkamer'
+];
 
 async function authenticate(){
     let auth;
@@ -86,55 +105,88 @@ function setMaxMinContent(selector, entity){
     document.querySelectorAll(selector.replace('-temp', '-time')).forEach(el => el.textContent   =   `${h}:${m}`);  
 }
 
+function processEntity(entity, entities){
+    let entId   = entity.entity_id;
+
+    // Temperatures
+    if( entId == 'sensor.pws_temperature'){
+        document.querySelector(`#outside .tempwrapper .temp`).textContent = entity.state;
+
+        checkTimedOut(entity, `#outside .tempwrapper .temp`);
+    }else if( entId == 'sensor.pws_temperature_indoor'){
+        document.querySelector(`#inside .tempwrapper .temp`).textContent = entity.state;
+
+        checkTimedOut(entity, `#inside .tempwrapper .temp`);
+    }
+
+    // Humidity
+    else if( entId == 'sensor.pws_humidity'){
+        document.querySelector(`#outside .humwrapper .hum`).textContent = entity.state;
+    }else if( entId == 'sensor.pws_humidity_indoor'){
+        document.querySelector(`#inside .humwrapper .hum`).textContent = entity.state;
+    }
+    
+    // Max Temps
+    else if( entId == 'sensor.maximum_temperature_outside'){
+        setMaxMinContent('#outside .max .max-temp', entity);
+    }else if( entId == 'sensor.maximum_temperature_inside'){
+        setMaxMinContent('#inside .max .max-temp', entity); 
+    }
+    
+    // Min temps
+    else if( entId == 'sensor.minimum_temperature_outside'){
+        setMaxMinContent('#outside .min .min-temp', entity);
+    }else if( entId == 'sensor.minimum_temperature_inside'){
+        setMaxMinContent('#inside .min .min-temp', entity); 
+    }
+    
+    // Rain
+    else if( entId == 'sensor.pws_rain'){
+        updateRain(entity.state, entities['sensor.pws_rainrate']);
+    }else if( entId == 'sensor.pws_rainrate'){
+        updateRain(entities['sensor.pws_rain'], entity.state);
+    }
+
+    else if( entId.includes( 'media_player' )){
+        playStateChanged    = true;
+
+        if(entity.state == 'playing'){// hide all
+            document.querySelectorAll('.mediaplayer, .container').forEach(el=>el.style.display = 'none');  
+
+            // Show the relevant one
+            document.querySelector('.' + entId.replace('.', '_')).style.display    = 'block';
+
+            playing = true;
+        }
+    }
+}
+
 // Display the received entities
 function renderEntities(connection, entities) {
-    window.entities = entities;
+    let firstRun    = false;
 
-    let rain        = -1;
-    let rainRate    = -1;
-    Object.keys(entities).sort().forEach((entId) => {      
-        // Temperatures
-        if( entId == 'sensor.pws_temperature'){
-            document.querySelector(`#outside .tempwrapper .temp`).textContent = entities[entId].state;
+    if(window.entities == undefined){
+        window.entities = entities;
+        firstRun        = true;
+    }
 
-            checkTimedOut(entities[entId], `#outside .tempwrapper .temp`);
-        }else if( entId == 'sensor.pws_temperature_indoor'){
-            document.querySelector(`#inside .tempwrapper .temp`).textContent = entities[entId].state;
-
-            checkTimedOut(entities[entId], `#inside .tempwrapper .temp`);
-        }
-
-        // Humidity
-        else if( entId == 'sensor.pws_humidity'){
-            document.querySelector(`#outside .humwrapper .hum`).textContent = entities[entId].state;
-        }else if( entId == 'sensor.pws_humidity_indoor'){
-            document.querySelector(`#inside .humwrapper .hum`).textContent = entities[entId].state;
-        }
-        
-        // Max Temps
-        else if( entId == 'sensor.maximum_temperature_outside'){
-            setMaxMinContent('#outside .max .max-temp', entities[entId]);
-        }else if( entId == 'sensor.maximum_temperature_inside'){
-            setMaxMinContent('#inside .max .max-temp', entities[entId]); 
-        }
-        
-        // Min temps
-        else if( entId == 'sensor.minimum_temperature_outside'){
-            setMaxMinContent('#outside .min .min-temp', entities[entId]);
-        }else if( entId == 'sensor.minimum_temperature_inside'){
-            setMaxMinContent('#inside .min .min-temp', entities[entId]); 
-        }
-        
-        // Rain
-        else if( entId == 'sensor.pws_rain'){
-            rain        = entities[entId].state;
-        }else if( entId == 'sensor.pws_rainrate'){
-            rainRate    = entities[entId].state;
+    playStateChanged    = false;
+    // Loop over the entities we are interested in
+    entIds.forEach(id => {
+        // Only do something if needed
+        if(entities[id].state != window.entities[id].state || firstRun){
+            processEntity(entities[id], entities);
         }
     });
 
-    if( rain > 0 && rainRate > -1){
-        updateRain(rain, rainRate);
+    // Store the updated entities
+    window.entities = entities;
+
+    if(!playing && playStateChanged){
+        // hide all
+        document.querySelectorAll('.mediaplayer').forEach(el=>el.style.display = 'none');  
+
+        document.querySelector('.container').style.display = 'block';   
     }
 }
   
@@ -208,7 +260,7 @@ function updateRain(rain, rainRate){
 
     if(rainRate > 0){
         val += `${rainRate}mm/h`;
-    }else if(device.Rain > 0){
+    }else if(rain > 0){
         val += `${rain}mm`;
     }else{
         val = ``;
@@ -303,3 +355,27 @@ document.addEventListener('doubletap', (event) => {
 });
 
 window.scrollTo(0, 0);
+
+// Hide topbar when iframe is loaded
+document.querySelectorAll("body > div > iframe").forEach(iframe => iframe.addEventListener( "load", hideTopBar) );
+
+async function hideTopBar(event){
+    let iframe  = event.target;
+    await new Promise(r => setTimeout(r, 5000));
+
+    try{
+        iframe.contentWindow.document.querySelector("home-assistant").shadowRoot.querySelector("home-assistant-main").shadowRoot.querySelector("ha-panel-lovelace").shadowRoot.querySelector("hui-root").shadowRoot.querySelector(".header").remove();
+
+        iframe.contentWindow.document.querySelector("home-assistant").shadowRoot.querySelector("home-assistant-main").shadowRoot.querySelector("ha-panel-lovelace").shadowRoot.querySelector("hui-root").shadowRoot.querySelector("#view").style.paddingTop='unset';
+
+        document.querySelector("body > home-assistant").shadowRoot.querySelector("home-assistant-main").shadowRoot.querySelector("ha-drawer > ha-sidebar")
+    }catch(err) {
+        console.error(err.message);
+
+        // Wait a minute
+        await new Promise(r => setTimeout(r, 60000));
+
+        // Releoad page
+        location.href   = location.href;
+    }
+}

@@ -11,6 +11,7 @@ body{
     overflow:           hidden;
     user-select:        none;
     font-family:        sans-serif;
+    margin:             0;
 }
 
 .headwrapper{
@@ -95,4 +96,9 @@ body{
 
 body{
     overflow:       hidden !important;
+}
+
+.mediaplayer iframe{
+    width: 100vw;
+    height: 100vh;
 }
