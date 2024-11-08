@@ -150,12 +150,30 @@ function processEntity(entity, entities){
     else if( entId.includes( 'media_player' )){
         playStateChanged    = true;
 
-        if(entity.state == 'playing'){// hide all
-            document.querySelectorAll('.mediaplayer, .container').forEach(el=>el.style.display = 'none');  
+        // we are playing or buffering and not playing before
+        if((entity.state == 'playing' || entity.state == 'buffering') && !playing){
+            // hide all
+            document.querySelector('.container').style.display = 'none';  
 
             // Show the relevant one
-            document.querySelector('.' + entId.replace('.', '_')).style.display    = 'block';
+            document.querySelector('.mediaplayer').style.display    = 'block';
+            document.querySelector('.mediaplayer iframe').addEventListener( "load", hideTopBar);
 
+            // Set the iframe url
+            let url = 'http://192.168.0.200:8123/';
+            if (entId == 'media_player.allemaal'){
+                url   += 'dashboard-chromecast/0';
+            }else if(entId == 'media_player.keuken'){
+                url   += 'chromecast-keuken/0';
+            }else if(entId == 'media_player.woonkamer'){
+                url   += 'chromecast-woonkamer/0';
+            }
+
+            // Only change the url if needed, otherwise it will reload
+            if(document.querySelector('.mediaplayer iframe').src != url){
+                document.querySelector('.mediaplayer iframe').src   = url;
+            }
+            
             playing = true;
         }
     }
@@ -171,6 +189,8 @@ function renderEntities(connection, entities) {
     }
 
     playStateChanged    = false;
+    playing             = false;
+
     // Loop over the entities we are interested in
     entIds.forEach(id => {
         // Only do something if needed
@@ -185,6 +205,8 @@ function renderEntities(connection, entities) {
     if(!playing && playStateChanged){
         // hide all
         document.querySelectorAll('.mediaplayer').forEach(el=>el.style.display = 'none');  
+
+        document.querySelector('.mediaplayer iframe').src='';
 
         document.querySelector('.container').style.display = 'block';   
     }
@@ -357,8 +379,6 @@ document.addEventListener('doubletap', (event) => {
 window.scrollTo(0, 0);
 
 // Hide topbar when iframe is loaded
-document.querySelectorAll("body > div > iframe").forEach(iframe => iframe.addEventListener( "load", hideTopBar) );
-
 async function hideTopBar(event){
     let iframe  = event.target;
     await new Promise(r => setTimeout(r, 5000));
