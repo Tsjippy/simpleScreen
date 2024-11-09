@@ -15,8 +15,6 @@ import './secrets.js';
 
 let unsubEntities;
 var connection          = '';
-var playing             = false;
-var playStateChanged    = false;
  
 // Only check the ones we are interested in 
 var entIds          = [
@@ -148,12 +146,10 @@ function processEntity(entity, entities){
     }
 
     else if( entId.includes( 'media_player' )){
-        playStateChanged    = true;
-
         // we are playing or buffering and not playing before
         if((entity.state == 'playing' || entity.state == 'buffering') && !playing){
             // hide all
-            document.querySelector('.container').style.display = 'none';  
+            document.querySelector('.container').style.display      = 'none';  
 
             // Show the relevant one
             document.querySelector('.mediaplayer').style.display    = 'block';
@@ -173,8 +169,6 @@ function processEntity(entity, entities){
             if(document.querySelector('.mediaplayer iframe').src != url){
                 document.querySelector('.mediaplayer iframe').src   = url;
             }
-            
-            playing = true;
         }
     }
 }
@@ -188,21 +182,25 @@ function renderEntities(connection, entities) {
         firstRun        = true;
     }
 
-    playStateChanged    = false;
-    playing             = false;
-
     // Loop over the entities we are interested in
+    let playing = false;
     entIds.forEach(id => {
+
         // Only do something if needed
         if(entities[id].state != window.entities[id].state || firstRun){
             processEntity(entities[id], entities);
+        }
+
+        // Check if we are playing no matter if it is changed or not
+        if( id.includes( 'media_player' ) && ( entities[id].state == 'playing' || entities[id].state == 'buffering')){
+            playing = true;
         }
     });
 
     // Store the updated entities
     window.entities = entities;
 
-    if(!playing && playStateChanged){
+    if(!playing && document.querySelector('.mediaplayer iframe').src    != ''){
         // hide all
         document.querySelectorAll('.mediaplayer').forEach(el=>el.style.display = 'none');  
 
