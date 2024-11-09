@@ -15,6 +15,7 @@ import './secrets.js';
 
 let unsubEntities;
 var connection          = '';
+var counter             = 0;
  
 // Only check the ones we are interested in 
 var entIds          = [
@@ -145,15 +146,18 @@ function processEntity(entity, entities){
         updateRain(entities['sensor.pws_rain'], entity.state);
     }
 
-    else if( entId.includes( 'media_player' )){
+    // Only change the url if needed, otherwise it will reload
+    else if( entId.includes( 'media_player' ) && document.querySelector('.mediaplayer iframe') == null){
         // we are playing or buffering and not playing before
-        if((entity.state == 'playing' || entity.state == 'buffering') && !playing){
-            // hide all
+        if((entity.state == 'playing' || entity.state == 'buffering')){
+            console.log('Showing Media player');
+
+            // hide main container
             document.querySelector('.container').style.display      = 'none';  
 
-            // Show the relevant one
-            document.querySelector('.mediaplayer').style.display    = 'block';
-            document.querySelector('.mediaplayer iframe').addEventListener( "load", hideTopBar);
+            let iframe      = document.createElement('iframe');
+            iframe.name     = 'ha-main-window';
+            iframe.onload   = hideTopBar;
 
             // Set the iframe url
             let url = 'http://192.168.0.200:8123/';
@@ -165,10 +169,10 @@ function processEntity(entity, entities){
                 url   += 'chromecast-woonkamer/0';
             }
 
-            // Only change the url if needed, otherwise it will reload
-            if(document.querySelector('.mediaplayer iframe').src != url){
-                document.querySelector('.mediaplayer iframe').src   = url;
-            }
+            // Show the iframe
+            document.querySelector('.mediaplayer').appendChild(iframe);
+
+            iframe.src   = url;
         }
     }
 }
@@ -200,11 +204,11 @@ function renderEntities(connection, entities) {
     // Store the updated entities
     window.entities = entities;
 
-    if(!playing && document.querySelector('.mediaplayer iframe').src    != ''){
-        // hide all
-        document.querySelectorAll('.mediaplayer').forEach(el=>el.style.display = 'none');  
+    if( !playing && document.querySelector('.mediaplayer iframe') != null ){
+        console.log('Hiding Media player');
 
-        document.querySelector('.mediaplayer iframe').src='';
+        // hide all
+        document.querySelectorAll('.mediaplayer').remove(); 
 
         document.querySelector('.container').style.display = 'block';   
     }
@@ -370,7 +374,7 @@ document.addEventListener('doubletap', (event) => {
     });
 
     callService(connection, "homeassistant", "toggle", {
-        entity_id: 'device_tracker.staande_lamp_2',
+        entity_id: 'switch.smart_plug_2_socket_1',
     });
 });
 
@@ -388,12 +392,15 @@ async function hideTopBar(event){
 
         document.querySelector("body > home-assistant").shadowRoot.querySelector("home-assistant-main").shadowRoot.querySelector("ha-drawer > ha-sidebar")
     }catch(err) {
-        console.error(err.message);
-
         // Wait a minute
-        await new Promise(r => setTimeout(r, 60000));
+        await new Promise(r => setTimeout(r, 10000));
 
-        // Releoad page
-        location.href   = location.href;
+        counter++;
+
+        if( counter < 10){
+            hideTopBar(event);
+        }else{
+            console.log(err.message);
+        }
     }
 }
