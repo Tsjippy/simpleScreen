@@ -9,8 +9,6 @@ import {
     ERR_HASS_HOST_REQUIRED
 } from "home-assistant-js-websocket";
 
-//import handle_subscribe_entities from 
-
 import './secrets.js';
 
 let unsubEntities;
@@ -36,8 +34,8 @@ var entIds          = [
 
 async function authenticate(){
     let auth;
-    const storeAuth = true;
-    const authOptions = storeAuth
+    const storeAuth     = true;
+    const authOptions   = storeAuth
     ? {
         async loadTokens() {
             try {
@@ -54,8 +52,6 @@ async function authenticate(){
 
     try {
         auth            = await getAuth(authOptions);
-
-        authenticated   = true;
     } catch (err) {
         if (err === ERR_HASS_HOST_REQUIRED) {
             authOptions.hassUrl = prompt(
@@ -66,8 +62,6 @@ async function authenticate(){
             if (!authOptions.hassUrl) return;
 
             auth            = await getAuth(authOptions);
-
-            authenticated   = true;
         } else {
             alert(`Unknown error: ${err}`);
             return;
@@ -86,8 +80,9 @@ async function authenticate(){
     }
 
     // To play from the console
-    window.auth = auth;
-    window.connection = connection;
+    window.auth         = auth;
+    window.connection   = connection;
+
     getUser(connection).then((user) => {
         console.log("Logged in as", user);
         window.user = user;
@@ -188,15 +183,15 @@ function renderEntities(connection, entities) {
 
     // Loop over the entities we are interested in
     let playing = false;
-    entIds.forEach(id => {
 
+    Object.values(entities).forEach(entity => {
         // Only do something if needed
-        if(entities[id].state != window.entities[id].state || firstRun){
-            processEntity(entities[id], entities);
+        if(entity.state != window.entities[entity.entity_id].state || firstRun){
+            processEntity(entity, entities);
         }
 
         // Check if we are playing no matter if it is changed or not
-        if( id.includes( 'media_player' ) && ( entities[id].state == 'playing' || entities[id].state == 'buffering')){
+        if( entity.entity_id.includes( 'media_player' ) && ( entity.state == 'playing' || entity.state == 'buffering')){
             playing = true;
         }
     });
@@ -204,11 +199,12 @@ function renderEntities(connection, entities) {
     // Store the updated entities
     window.entities = entities;
 
+    // Show main container again if we are not playing and there is an iframe
     if( !playing && document.querySelector('.mediaplayer iframe') != null ){
         console.log('Hiding Media player');
 
         // hide all
-        document.querySelectorAll('.mediaplayer').remove(); 
+        document.querySelector('.mediaplayer').remove(); 
 
         document.querySelector('.container').style.display = 'block';   
     }
@@ -334,8 +330,10 @@ window.setupEntitiesSubscription = async () => {
         await new Promise((resolve) => setTimeout(resolve, 4000));
     }
 
-    unsubEntities = subscribeEntities(connection, (entities) =>
-        renderEntities(connection, entities),
+    unsubEntities = subscribeEntities(
+        connection, 
+        (entities) => renderEntities(connection, entities),
+        entIds
     );
 };
 
@@ -365,16 +363,10 @@ document.addEventListener('pointerup', detectDoubleTap(500));
 
 // Listen to two taps on the screen
 document.addEventListener('doubletap', (event) => {
-    callService(connection, "homeassistant", "toggle", {
-        entity_id: 'switch.woonkamer_lamp_switch_0',
-    });
-
-    callService(connection, "homeassistant", "toggle", {
-        entity_id: 'switch.smart_plug_3_socket_1',
-    });
-
-    callService(connection, "homeassistant", "toggle", {
-        entity_id: 'switch.smart_plug_2_socket_1',
+    ['switch.woonkamer_lamp_switch_0', 'switch.smart_plug_3_socket_1', 'switch.smart_plug_2_socket_1'].forEach(id =>{
+        callService(connection, "homeassistant", "toggle", {
+            entity_id: id,
+        });
     });
 });
 
