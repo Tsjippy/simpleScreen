@@ -8,56 +8,81 @@
     <title>Temperature monitor</title>
   </head>
   <body>
-    <div class="container">
-        <div id="fullscreen-clock">
-            <div class="headwrapper">
-                <div id="date" class='grow'></div>
-                <div id="clock" class='grow'></div>
-                <div id="rain" class='grow' style='display:none'></div>
-            </div>
-            <div id="temp">
-                <div id="inside" class='grow'>
-                    <div class='location'>
-                        <div class='min'>
-                            <div class="min-temp"></div>
-                            <div class="min-time"></div>
-                        </div>
-                        <div>Inside</div>
-                        <div class='max'>
-                            <div class="max-temp"></div>
-                            <div class="max-time"></div>
-                        </div>
+    <div class="container hidden">
+        <div class="headwrapper">
+            <div id="date" class='grow'></div>
+            <div id="clock" class='grow'></div>
+            <div id="rain" class='grow' style='display:none'></div>
+        </div>
+        <div id="temp">
+            <div id="inside" class='grow'>
+                <div class='location'>
+                    <div class='min'>
+                        <div class="min-temp"></div>
+                        <div class="min-time"></div>
                     </div>
-                    <div class='tempwrapper'>
-                        <span class='temp'></span>°C
-                    </div>
-                    <div class='humwrapper'>
-                        <span class='hum'></span>%
+                    <div>Inside</div>
+                    <div class='max'>
+                        <div class="max-temp"></div>
+                        <div class="max-time"></div>
                     </div>
                 </div>
-                <div id="outside" class='grow'>
-                    <div class='location'>
-                        <div class='min'>
-                            <div class="min-temp"></div>
-                            <div class="min-time"></div>
-                        </div>
-                        <span>Outside</span>
-                        <div class='max'>
-                            <div class="max-temp"></div>
-                            <div class="max-time"></div>
-                        </div>
+                <div class='tempwrapper'>
+                    <span class='temp'></span>°C
+                </div>
+                <div class='humwrapper'>
+                    <span class='hum'></span>%
+                </div>
+            </div>
+            <div id="outside" class='grow'>
+                <div class='location'>
+                    <div class='min'>
+                        <div class="min-temp"></div>
+                        <div class="min-time"></div>
                     </div>
-                    <div class='tempwrapper'>
-                        <span class='temp'></span>°C
+                    <span>Outside</span>
+                    <div class='max'>
+                        <div class="max-temp"></div>
+                        <div class="max-time"></div>
                     </div>
-                    <div class='humwrapper'>
-                        <span class='hum'></span>%
-                    </div>
+                </div>
+                <div class='tempwrapper'>
+                    <span class='temp'></span>°C
+                </div>
+                <div class='humwrapper'>
+                    <span class='hum'></span>%
                 </div>
             </div>
         </div>
     </div>
-    <div class="mediaplayer"></div>
+    <div class="mediaplayer">
+        <div class="title"></div>
+
+        <div class="volume">
+            <div>
+                <span id="volume-plus" data-action="volume_up"><img src="images/volume-plus.png"  alt="+"></span>
+            </div>
+            <div>
+                <input type="range" id="volume-slider" class="input-range" step="0.1" min="0" max="1">
+            </div>
+            <div class="volume-min">
+                <span id="volume-min" data-action="volume_down"><img src="images/volume-minus.png"  alt="-"></span>
+                <span id="volume-mute" data-action="volume_mute"><img src="images/volume-mute.png"  alt="mute"></span>
+            </div>
+        </div>
+
+        <div class="playback-controls">
+            <span id="stop" data-action="media_stop"><img src="images/stop.png"  alt="Stop"></span>
+            <span id="previous" data-action="media_previous_track"><img src="images/prev.png"  alt="Prev" </span>
+            <span id="pause" data-action="media_pause"><img src="images/pause.png"  alt="Pause"></span>
+            <span id="play" data-action="media_play"><img src="images/play.png"  alt="Play"></span>
+            <span id="next" data-action="media_next_track"><img src="images/next.png"  alt="Next"></span>
+        </div>
+
+        <div class="progress">
+            <input type="range" id="progress" name="volume" min="0" step="0.001" data-action="media_seek"/>
+        </div>
+    </div>
 
     <script src="js/secrets.js"></script>
     <script src="js/main.min.js?version=1.1.3"></script>

@@ -1,19 +1,17 @@
 import {
-    Auth,
     createLongLivedTokenAuth,
     getAuth,
     getUser,
-    callService,
     createConnection,
     subscribeEntities,
     ERR_HASS_HOST_REQUIRED
 } from "home-assistant-js-websocket";
 
 import './secrets.js';
+import './actions.js';
+import {showMediaPlayer} from './media_player.js';
 
 let unsubEntities;
-var connection          = '';
-var counter             = 0;
  
 // Only check the ones we are interested in 
 var entIds          = [
@@ -29,7 +27,8 @@ var entIds          = [
     'sensor.pws_rainrate',
     'media_player.allemaal',
     'media_player.keuken',
-    'media_player.woonkamer'
+    'media_player.woonkamer',
+    'switch.woonkamer_lamp_switch_0' 
 ];
 
 async function authenticate(){
@@ -68,10 +67,10 @@ async function authenticate(){
         }
     }
 
-    connection = await createConnection({ auth });
+    window.connection = await createConnection({ auth });
     
     for (const ev of ["disconnected", "ready", "reconnect-error"]) {
-        connection.addEventListener(ev, () => console.log(`Event: ${ev}`));
+        window.connection.addEventListener(ev, () => console.log(`Event: ${ev}`));
     }
 
     // Clear url if we have been able to establish a connection
@@ -81,9 +80,8 @@ async function authenticate(){
 
     // To play from the console
     window.auth         = auth;
-    window.connection   = connection;
 
-    getUser(connection).then((user) => {
+    getUser(window.connection).then((user) => {
         console.log("Logged in as", user);
         window.user = user;
     });
@@ -140,36 +138,6 @@ function processEntity(entity, entities){
     }else if( entId == 'sensor.pws_rainrate'){
         updateRain(entities['sensor.pws_rain'], entity.state);
     }
-
-    // Only change the url if needed, otherwise it will reload
-    else if( entId.includes( 'media_player' ) && document.querySelector('.mediaplayer iframe') == null){
-        // we are playing or buffering and not playing before
-        if((entity.state == 'playing' || entity.state == 'buffering')){
-            console.log('Showing Media player');
-
-            // hide main container
-            document.querySelector('.container').style.display      = 'none';  
-
-            let iframe      = document.createElement('iframe');
-            iframe.name     = 'ha-main-window';
-            iframe.onload   = hideTopBar;
-
-            // Set the iframe url
-            let url = 'http://192.168.0.200:8123/';
-            if (entId == 'media_player.allemaal'){
-                url   += 'dashboard-chromecast/0';
-            }else if(entId == 'media_player.keuken'){
-                url   += 'chromecast-keuken/0';
-            }else if(entId == 'media_player.woonkamer'){
-                url   += 'chromecast-woonkamer/0';
-            }
-
-            // Show the iframe
-            document.querySelector('.mediaplayer').appendChild(iframe);
-
-            iframe.src   = url;
-        }
-    }
 }
 
 // Display the received entities
@@ -191,8 +159,9 @@ function renderEntities(connection, entities) {
         }
 
         // Check if we are playing no matter if it is changed or not
-        if( entity.entity_id.includes( 'media_player' ) && ( entity.state == 'playing' || entity.state == 'buffering')){
+        if( entity.entity_id.includes( 'media_player' ) && ( entity.state == 'playing' || entity.state == 'buffering' || entity.state == 'paused')){
             playing = true;
+            showMediaPlayer(entity);
         }
     });
 
@@ -200,13 +169,13 @@ function renderEntities(connection, entities) {
     window.entities = entities;
 
     // Show main container again if we are not playing and there is an iframe
-    if( !playing && document.querySelector('.mediaplayer iframe') != null ){
+    if( !playing){
         console.log('Hiding Media player');
 
         // hide all
-        document.querySelector('.mediaplayer').remove(); 
+        document.querySelector('.mediaplayer').classList.add('hidden');
 
-        document.querySelector('.container').style.display = 'block';   
+        document.querySelector('.container').classList.remove('hidden');
     }
 }
   
@@ -299,30 +268,6 @@ function updateRain(rain, rainRate){
     }
 }
 
-/* Based on ethanny2 solution: https://gist.github.com/ethanny2/44d5ad69970596e96e0b48139b89154b */
-function detectDoubleTap(doubleTapMs) {
-    let timeout, lastTap = 0;
-
-    return function detectDoubleTap(event) {
-        const currentTime = new Date().getTime();
-        const tapLength   = currentTime - lastTap;
-
-        if (0 < tapLength && tapLength < doubleTapMs) {
-            event.preventDefault();
-
-            const doubleTap = new CustomEvent("doubletap", {
-                bubbles: true,
-                detail: event
-            });
-
-            event.target.dispatchEvent(doubleTap)
-        } else {
-            timeout = setTimeout(() => clearTimeout(timeout), doubleTapMs)
-        }
-        lastTap = currentTime
-    }
-}
-
 window.setupEntitiesSubscription = async () => {
     if (unsubEntities) {
         unsubEntities();
@@ -331,8 +276,8 @@ window.setupEntitiesSubscription = async () => {
     }
 
     unsubEntities = subscribeEntities(
-        connection, 
-        (entities) => renderEntities(connection, entities),
+        window.connection, 
+        (entities) => renderEntities(window.connection, entities),
         entIds
     );
 };
@@ -350,7 +295,7 @@ if(typeof(HA_INSTANCE) != 'undefined'){
             HA_SECRET,
         );
 
-        connection = await createConnection({ auth });
+        window.connection = await createConnection({ auth });
     })();
 }else{
     await authenticate();
@@ -358,41 +303,4 @@ if(typeof(HA_INSTANCE) != 'undefined'){
 
 setupEntitiesSubscription();
 
-// initialize the new event
-document.addEventListener('pointerup', detectDoubleTap(500));
-
-// Listen to two taps on the screen
-document.addEventListener('doubletap', (event) => {
-    ['switch.woonkamer_lamp_switch_0', 'switch.smart_plug_3_socket_1', 'switch.smart_plug_2_socket_1'].forEach(id =>{
-        callService(connection, "homeassistant", "toggle", {
-            entity_id: id,
-        });
-    });
-});
-
 window.scrollTo(0, 0);
-
-// Hide topbar when iframe is loaded
-async function hideTopBar(event){
-    let iframe  = event.target;
-    await new Promise(r => setTimeout(r, 5000));
-
-    try{
-        iframe.contentWindow.document.querySelector("home-assistant").shadowRoot.querySelector("home-assistant-main").shadowRoot.querySelector("ha-panel-lovelace").shadowRoot.querySelector("hui-root").shadowRoot.querySelector(".header").remove();
-
-        iframe.contentWindow.document.querySelector("home-assistant").shadowRoot.querySelector("home-assistant-main").shadowRoot.querySelector("ha-panel-lovelace").shadowRoot.querySelector("hui-root").shadowRoot.querySelector("#view").style.paddingTop='unset';
-
-        document.querySelector("body > home-assistant").shadowRoot.querySelector("home-assistant-main").shadowRoot.querySelector("ha-drawer > ha-sidebar")
-    }catch(err) {
-        // Wait a minute
-        await new Promise(r => setTimeout(r, 10000));
-
-        counter++;
-
-        if( counter < 10){
-            hideTopBar(event);
-        }else{
-            console.log(err.message);
-        }
-    }
-}
