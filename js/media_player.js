@@ -22,6 +22,10 @@ export function showMediaPlayer(entity){
     // Background image
     if(entity.attributes.entity_picture != undefined){
         mediaplayer.style.backgroundImage               = `url("${entity.attributes.entity_picture}")`; //https://i.scdn.co/image/ab67616d0000b273c1fe6f334de756c96d708d95
+    }else if(entity.attributes.app_name == 'Spotify'){
+        mediaplayer.style.backgroundImage               = `url(images/spotify.png)`; 
+    }else if(entity.attributes.app_name == 'Youtube'){
+        mediaplayer.style.backgroundImage               = `url(images/youtube.png)`; 
     }
 
     // Title
