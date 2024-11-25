@@ -60,11 +60,19 @@ export function showMediaPlayer(entity){
 
 // Listen to controls
 document.addEventListener('click', (event) => {
-    let target  = event.target;
-    let parent  = target.closest('span');
+    let target              = event.target;
+    let parent              = target.closest('span');
+    let mediaControlWrapper = target.closest(`.mediaplayer`);
+    if(mediaControlWrapper == null){
+        return;
+    }
+    let domain              = target.dataset.domain;
+    if(domain == undefined){
+        domain  = "media_player";
+    }
     
     // The entity id of the device we run the action for
-    let playerId    = target.closest(`.mediaplayer`).dataset.player_id;   
+    let playerId    = mediaControlWrapper.dataset.player_id;   
 
     let action;
 
@@ -97,5 +105,5 @@ document.addEventListener('click', (event) => {
         data['seek_position']   = target.value;
     }
 
-    callService(connection, "media_player", action, data);
+    callService(connection, domain, action, data);
 });

@@ -32,7 +32,6 @@ body{
 
 #temp{
 	height:         calc(100vh - 120px);
-    margin-top:     35px;
 }
 
 #inside, #outside{
@@ -101,7 +100,8 @@ body{
 .mediaplayer{
     -webkit-text-stroke-width:  1px;
     -webkit-text-stroke-color:  #838383;
-    background-size:            cover;
+    background-position:        center;
+    background-repeat:          no-repeat;
     min-height:                 100vh;
 }
 

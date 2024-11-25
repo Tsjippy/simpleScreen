@@ -1,3 +1,7 @@
+import {
+    callService
+} from "home-assistant-js-websocket";
+
 /* Based on ethanny2 solution: https://gist.github.com/ethanny2/44d5ad69970596e96e0b48139b89154b */
 function detectDoubleTap(doubleTapMs) {
     let timeout, lastTap = 0;
