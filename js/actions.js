@@ -44,13 +44,21 @@ document.addEventListener('click', ev =>{
         action  = 'turn_off';
     }else if(target.closest('.modal-close') != undefined){
         document.getElementById('popup').classList.add('hidden');
+
+        closeModal();
     }
 
     if(action){
+        closeModal();
+
         ['switch.woonkamer_lamp_switch_0', 'switch.smart_plug_3_socket_1', 'switch.smart_plug_2_socket_1'].forEach(id =>{
             callService(connection, "homeassistant", action, {
                 entity_id: id,
             });
         });
     }
-})
+});
+
+function closeModal(){
+    document.getElementById('popup').classList.add('hidden');
+}
