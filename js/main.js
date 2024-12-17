@@ -173,9 +173,9 @@ function renderEntities(connection, entities) {
         console.log('Hiding Media player');
 
         // hide all
-        document.querySelector('.mediaplayer').classList.add('hidden');
+        document.querySelector('#mediaplayer').classList.add('hidden');
 
-        document.querySelector('.container').classList.remove('hidden');
+        document.querySelector('#container').classList.remove('hidden');
     }
 }
   

@@ -8,7 +8,7 @@ var progressTimer;
 export function showMediaPlayer(entity){
     console.log(entity)
 
-    let mediaplayer = document.querySelector('.mediaplayer');
+    let mediaplayer = document.querySelector('#mediaplayer');
     mediaplayer.classList.remove('hidden');
 
     // Store the device we are playing on
@@ -62,7 +62,7 @@ export function showMediaPlayer(entity){
 document.addEventListener('click', (event) => {
     let target              = event.target;
     let parent              = target.closest('span');
-    let mediaControlWrapper = target.closest(`.mediaplayer`);
+    let mediaControlWrapper = target.closest(`#mediaplayer`);
     if(mediaControlWrapper == null){
         return;
     }

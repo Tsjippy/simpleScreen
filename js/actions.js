@@ -30,16 +30,27 @@ function detectDoubleTap(doubleTapMs) {
 document.addEventListener('pointerup', detectDoubleTap(500));
 
 // Listen to two taps on the screen and turn change the lights
-document.addEventListener('doubletap', (event) => {
-    let action  = "turn_off";
+document.addEventListener('doubletap', () => {
+    document.getElementById('popup').classList.remove('hidden');
+});
 
-    if(window.entities['switch.woonkamer_lamp_switch_0'].state == 'Off'){
+document.addEventListener('click', ev =>{
+    let target  = ev.target;
+    let action;
+
+    if(target.dataset.action == 'all-on'){
         action  = 'turn_on';
+    }else if(target.dataset.action == 'all-off'){
+        action  = 'turn_off';
+    }else if(target.closest('.modal-close') != undefined){
+        document.getElementById('popup').classList.add('hidden');
     }
 
-    ['switch.woonkamer_lamp_switch_0', 'switch.smart_plug_3_socket_1', 'switch.smart_plug_2_socket_1'].forEach(id =>{
-        callService(connection, "homeassistant", action, {
-            entity_id: id,
+    if(action){
+        ['switch.woonkamer_lamp_switch_0', 'switch.smart_plug_3_socket_1', 'switch.smart_plug_2_socket_1'].forEach(id =>{
+            callService(connection, "homeassistant", action, {
+                entity_id: id,
+            });
         });
-    });
-});
+    }
+})

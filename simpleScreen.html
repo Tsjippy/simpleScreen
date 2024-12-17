@@ -8,7 +8,7 @@
     <title>Temperature monitor</title>
   </head>
   <body>
-    <div class="container hidden">
+    <div id="container" class="hidden">
         <div class="headwrapper">
             <div id="date" class='grow'></div>
             <div id="clock" class='grow'></div>
@@ -55,7 +55,8 @@
             </div>
         </div>
     </div>
-    <div class="mediaplayer">
+
+    <div id="mediaplayer">
         <div class="title"></div>
 
         <div class="volume">
@@ -81,6 +82,15 @@
 
         <div class="progress">
             <input type="range" id="progress" name="volume" min="0" step="0.001" data-action="media_seek"/>
+        </div>
+    </div>
+
+    <div id="popup" class="modal">
+        <div class="modal-close"><button>Close Modal</button></div>
+
+        <div class="modal-content">
+            <button data-action="all-on">Turn on Lights</button>
+            <button  data-action="all-off">Turn off Lights</button>
         </div>
     </div>
 

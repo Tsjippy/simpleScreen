@@ -97,7 +97,7 @@ body{
     display:            none;
 }
 
-.mediaplayer{
+#mediaplayer{
     -webkit-text-stroke-width:  1px;
     -webkit-text-stroke-color:  #838383;
     background-position:        center;
@@ -154,5 +154,48 @@ body{
 }
 
 input::-moz-focus-inner { 
-border:                 0; 
+    border:              0; 
+}
+
+.modal{
+    background-color:   rgba(0, 0, 0, .4);
+    z-index:             999999 !important;
+    position:           fixed;
+    left:               0;
+    top:                0;
+    width:              100%;
+    max-width:          100%;
+    height:             100%;
+    overflow:           auto;
+}
+
+.modal-content{
+    position:           absolute;
+    padding:            20px;
+    border:             1px solid #888;
+    border-radius:      10px;
+    max-width:          min(500px, 100vw);
+    background-color:   #fefefe;
+    overscroll-behavior-y: none;
+    overflow-y:          auto;
+    top:                50%;
+    left:               50%;
+    transform:          translate(-50%, -50%);
+    max-height:         calc(100vh - 20%);
+    text-align:         center;
+}
+
+.modal-content > button{
+    margin:             10px;
+    font-size:          xxx-large;
+}
+
+.modal-close{
+    width:              100vw
+}
+
+.modal-close button{
+    float:              right;
+    margin:             10px;
+    font-size:          xx-large;
 }
