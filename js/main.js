@@ -4,7 +4,8 @@ import {
     getUser,
     createConnection,
     subscribeEntities,
-    ERR_HASS_HOST_REQUIRED
+    ERR_HASS_HOST_REQUIRED,
+    getStates
 } from "home-assistant-js-websocket";
 
 import './secrets.js';
@@ -268,6 +269,53 @@ function updateRain(rain, rainRate){
     }
 }
 
+async function addButtons(){
+    let entitytlist = await getStates(window.connection);
+
+    let wrapper = document.querySelector(`#popup .modal-content`);
+    let types   = ['select', 'switch', 'remote', 'button', 'scene'];
+    let html;
+
+    for (const [key, entity] of Object.entries(entitytlist)) {
+        html        = '';
+
+        let domain  = entity.entity_id.split('.')[0];
+        let action;
+
+        if(types.includes(domain)){
+            if(entity.state != 'unknown' && entity.state != 'unavailable'){
+
+                if(domain == 'select'){
+                    html =`
+                        ${entity.attributes.friendly_name}
+                        <select>`;
+
+                    for (let i = 0; i < entity.attributes.options.length; i++) {
+                        html    += `<option data-domain='${domain}' data-action='${entity.attributes.options[i]}' data-id='${entity.entity_id}'>${entity.attributes.options[i]}</option>`;
+                    }
+                    html    += `</select><br>`;
+                }else{
+                    if(entity.state == 'on'){
+                        action  = 'turn_off';
+                    }else{
+                        action  = 'turn_on';
+                    }
+                    html    = `<button data-domain='${domain}' data-action='${action}' data-id='${entity.entity_id}'>${entity.attributes.friendly_name}</button>`;
+                }
+
+                wrapper.querySelector(`#${domain}`).insertAdjacentHTML('beforeEnd', html);
+            }
+        }
+    }
+
+    // Hide empty ones
+    for (let i = 0; i < types.length; i++) {
+        if(document.querySelector(`#${types[i]}`).innerHTML == ''){
+            document.querySelector(`#show_${types[i]}`).classList.add('hidden');
+        }
+    }
+}
+
 window.setupEntitiesSubscription = async () => {
     if (unsubEntities) {
         unsubEntities();
@@ -300,6 +348,9 @@ if(typeof(HA_INSTANCE) != 'undefined'){
 }else{
     await authenticate();
 }
+
+console.log('Adding buttons');
+addButtons();
 
 setupEntitiesSubscription();
 

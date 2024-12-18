@@ -94,7 +94,7 @@ body{
 }
 
 .hidden{
-    display:            none;
+    display:            none !important;
 }
 
 #mediaplayer{
@@ -174,7 +174,7 @@ input::-moz-focus-inner {
     padding:            20px;
     border:             1px solid #888;
     border-radius:      10px;
-    max-width:          min(500px, 100vw);
+    width:              min(700px, 100vw);
     background-color:   #fefefe;
     overscroll-behavior-y: none;
     overflow-y:          auto;
@@ -185,9 +185,10 @@ input::-moz-focus-inner {
     text-align:         center;
 }
 
-.modal-content > button{
+.modal-content button{
     margin:             10px;
-    font-size:          xxx-large;
+    font-size:          x-large;
+    margin-top:         3px;
 }
 
 .modal-close{
@@ -198,4 +199,17 @@ input::-moz-focus-inner {
     float:              right;
     margin:             10px;
     font-size:          xx-large;
+}
+
+.tablink:not(.active){
+    background-color: darkgrey;
+}
+
+#switch{
+    display:            flex;
+    flex-wrap:          wrap;
+}
+
+[data-action="turn_off"] {
+    background-color: yellow;
 }

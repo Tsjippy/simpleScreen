@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <link rel="stylesheet" href="css/main.css" >
+    <link rel="stylesheet" href="css/main.css?version=1.1.7" >
 
     <title>Temperature monitor</title>
   </head>
@@ -89,13 +89,23 @@
         <div class="modal-close"><button>Close Modal</button></div>
 
         <div class="modal-content">
-            <button data-action="all-on">Turn on Lights</button>
-            <button  data-action="all-off">Turn off Lights</button>
+            <div class="tabs">
+                <button class="button tablink active" id="show_scene" data-target="scene">Scenes</button>
+                <button class="button tablink" id="show_select" data-target="select">Selectors</button>
+                <button class="button tablink" id="show_switch" data-target="switch">Switches</button>
+                <button class="button tablink" id="show_remote" data-target="remote">Remotes</button>
+                <button class="button tablink" id="show_button" data-target="button">Buttons</button>
+            </div>
+            <div id="scene"></div>
+            <div id="select" class="hidden"></div>
+            <div id="switch" class="hidden"></div>
+            <div id="remote" class="hidden"></div>
+            <div id="button" class="hidden"></div>
         </div>
     </div>
 
     <script src="js/secrets.js"></script>
-    <script src="js/main.min.js?version=1.1.6"></script>
+    <script src="js/main.min.js?version=1.1.7"></script>
   </body>
 
 </html>

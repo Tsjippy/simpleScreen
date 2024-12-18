@@ -34,29 +34,58 @@ document.addEventListener('doubletap', () => {
     document.getElementById('popup').classList.remove('hidden');
 });
 
-document.addEventListener('click', ev =>{
+document.addEventListener('click', async ev =>{
     let target  = ev.target;
-    let action;
+    let domain  = target.dataset.domain;
+    let action  = target.dataset.action;
+    let id      = target.dataset.id;
 
-    if(target.dataset.action == 'all-on'){
-        action  = 'turn_on';
-    }else if(target.dataset.action == 'all-off'){
-        action  = 'turn_off';
-    }else if(target.closest('.modal-close') != undefined){
+    if(target.closest('.modal-close') != undefined){
         document.getElementById('popup').classList.add('hidden');
 
         closeModal();
+    }else if(target.matches(`.tablink`)){
+        let curActive   = document.querySelector(`.tablink.active`);
+        document.querySelector(`#${curActive.dataset.target}`).classList.add('hidden');
+        curActive.classList.remove('active');
+        target.classList.add('active');
+        document.querySelector(`#${target.dataset.target}`).classList.remove('hidden');
     }
 
-    if(action){
-        closeModal();
+    if(action != undefined){
 
-        ['switch.woonkamer_lamp_switch_0', 'switch.smart_plug_3_socket_1', 'switch.smart_plug_2_socket_1'].forEach(id =>{
-            callService(connection, "homeassistant", action, {
-                entity_id: id,
-            });
+        callService(window.connection, domain, action, {
+            entity_id: id,
         });
+
+        if(action == 'turn_on'){
+            target.dataset.action = 'turn_off';
+        }else if(action == 'turn_off'){
+            target.dataset.action = 'turn_on';
+        }
+
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+
+        closeModal();
     }
+});
+
+document.addEventListener('change', ev =>{
+    let target  = ev.target;
+
+    let selectedOption  = target.options[target.selectedIndex];
+
+    
+
+    console.log(selectedOption);
+
+    let domain  = selectedOption.dataset.domain;
+    let action  = selectedOption.dataset.action;
+    let id      = selectedOption.dataset.id;
+
+    callService(window.connection, domain, action, {
+        entity_id: id,
+    });
 });
 
 function closeModal(){
