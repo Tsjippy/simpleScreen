@@ -352,6 +352,11 @@ window.setupEntitiesSubscription = async () => {
     );
 };
 
+// Update the title
+if(TITLE != undefined && TITLE != ''){
+    document.querySelector('head title').textContent = TITLE;
+}
+
 // Update the time every minute
 setDateTime();
 setInterval(setDateTime, 60000);
