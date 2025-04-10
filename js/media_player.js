@@ -17,7 +17,7 @@ export function showMediaPlayer(entity){
     console.log('Showing Media player');
 
     // Hide main container
-    document.querySelector('.container').classList.add('hidden');
+    document.querySelector('#container').classList.add('hidden');
 
     // Background image
     if(entity.attributes.entity_picture != undefined){

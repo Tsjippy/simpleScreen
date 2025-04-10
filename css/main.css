@@ -15,7 +15,7 @@ body{
     overflow: -moz-hidden-unscrollable;
 }
 
-.headwrapper{
+.headwrapper, .footerwrapper{
     display:        flex;
     align-items:    center;
     text-align:     center;
@@ -66,7 +66,7 @@ body{
     line-height:    0.8;
 }
 
-#date{
+#custom, #date{
     font-size:      16vh;
 }
 

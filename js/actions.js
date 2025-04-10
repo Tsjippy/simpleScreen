@@ -75,8 +75,6 @@ document.addEventListener('change', ev =>{
 
     let selectedOption  = target.options[target.selectedIndex];
 
-    
-
     console.log(selectedOption);
 
     let domain  = selectedOption.dataset.domain;

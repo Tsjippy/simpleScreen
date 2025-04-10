@@ -9,6 +9,7 @@
   "author": "Ewald Harmsen",
   "license": "ISC",
   "dependencies": {
+    "@mdi/font": "^7.4.47",
     "home-assistant-js-websocket": "^9.4.0",
     "webpack": "^5.95.0"
   },

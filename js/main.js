@@ -12,25 +12,7 @@ import './secrets.js';
 import './actions.js';
 import {showMediaPlayer} from './media_player.js';
 
-let unsubEntities;
- 
-// Only check the ones we are interested in 
-var entIds          = [
-    'sensor.pws_temperature',
-    'sensor.pws_temperature_indoor',
-    'sensor.pws_humidity_indoor',
-    'sensor.pws_humidity',
-    'sensor.maximum_temperature_outside',
-    'sensor.minimum_temperature_outside',
-    'sensor.maximum_temperature_inside',
-    'sensor.minimum_temperature_inside',
-    'sensor.pws_rain',
-    'sensor.pws_rainrate',
-    'media_player.allemaal',
-    'media_player.keuken',
-    'media_player.woonkamer',
-    'switch.woonkamer_lamp_switch_0' 
-];
+let unsubEntities, entitytlist;
 
 async function authenticate(){
     let auth;
@@ -102,43 +84,64 @@ function processEntity(entity, entities){
     let entId   = entity.entity_id;
 
     // Temperatures
-    if( entId == 'sensor.pws_temperature'){
+    if( entIds['outdoor_temp'] != undefined && entId == entIds['outdoor_temp']){
         document.querySelector(`#outside .tempwrapper .temp`).textContent = entity.state;
 
         checkTimedOut(entity, `#outside .tempwrapper .temp`);
-    }else if( entId == 'sensor.pws_temperature_indoor'){
+    }else if( entIds['indoor_temp'] != undefined && entId == entIds['indoor_temp']){
         document.querySelector(`#inside .tempwrapper .temp`).textContent = entity.state;
 
         checkTimedOut(entity, `#inside .tempwrapper .temp`);
     }
 
     // Humidity
-    else if( entId == 'sensor.pws_humidity'){
+    else if( entIds['outdoor_hum'] != undefined && entId == entIds['outdoor_hum']){
         document.querySelector(`#outside .humwrapper .hum`).textContent = entity.state;
-    }else if( entId == 'sensor.pws_humidity_indoor'){
+    }else if( entIds['indoor_hum'] != undefined && entId == entIds['indoor_hum']){
         document.querySelector(`#inside .humwrapper .hum`).textContent = entity.state;
     }
     
     // Max Temps
-    else if( entId == 'sensor.maximum_temperature_outside'){
+    else if( entIds['max_temp_outside'] != undefined && entId == entIds['max_temp_outside']){
         setMaxMinContent('#outside .max .max-temp', entity);
-    }else if( entId == 'sensor.maximum_temperature_inside'){
+    }else if( entIds['max_temp_inside'] != undefined && entId == entIds['max_temp_inside']){
         setMaxMinContent('#inside .max .max-temp', entity); 
     }
     
     // Min temps
-    else if( entId == 'sensor.minimum_temperature_outside'){
+    else if( entIds['min_temp_outside'] != undefined && entId == entIds['min_temp_outside']){
         setMaxMinContent('#outside .min .min-temp', entity);
-    }else if( entId == 'sensor.minimum_temperature_inside'){
+    }else if( entIds['min_temp_inside'] != undefined && entId == entIds['min_temp_inside']){
         setMaxMinContent('#inside .min .min-temp', entity); 
     }
     
     // Rain
-    else if( entId == 'sensor.pws_rain'){
-        updateRain(entity.state, entities['sensor.pws_rainrate']);
-    }else if( entId == 'sensor.pws_rainrate'){
-        updateRain(entities['sensor.pws_rain'], entity.state);
+    else if( entIds['rain'] != undefined && entId == entIds['rain']){
+        updateRain(entity.state, entities[entIds['rainrate']]);
+    }else if( entIds['rainrate'] != undefined && entId == entIds['rainrate']){
+        updateRain(entities[entIds['rain']], entity.state);
     }
+
+    // custom
+    ['custom', 'footer_1', 'footer_2', 'footer_3'].forEach(area => {
+        if( entIds[area] != undefined && entId == entIds[area]){
+            let content = '';
+
+            if(entity.attributes.icon != undefined){
+                let icon    = entity.attributes.icon.replace(':', '-');
+                let color   = '';
+                if(entity.state == 'on'){
+                    color   = 'gold';
+                }
+
+                content = `<span class="mdi ${icon}" style='${color}'></span>`;
+            }else{
+                content = entity.state;
+            }
+
+            document.querySelector(`#${area}`).innerHTML = content;
+        }
+    });
 }
 
 // Display the received entities
@@ -269,9 +272,25 @@ function updateRain(rain, rainRate){
     }
 }
 
-async function addButtons(){
-    let entitytlist = await getStates(window.connection);
+/**
+ * Retrieves a list of all available entities and adds all mediaplayers to the watch list
+ */
+async function processEntities(){
+    entitytlist = await getStates(window.connection);
 
+    for (const [key, entity] of Object.entries(entitytlist)) {
+        let domain  = entity.entity_id.split('.')[0];
+
+        if(domain == 'media_player'){
+            entIds[entity.entity_id]    = entity.entity_id;
+        }
+    }
+}
+
+/**
+ * Add the modal content to be able to dun actions on slectors, switches etc.
+ */
+function addButtons(){
     let wrapper = document.querySelector(`#popup .modal-content`);
     let types   = ['select', 'switch', 'remote', 'button', 'scene'];
     let html;
@@ -308,7 +327,7 @@ async function addButtons(){
         }
     }
 
-    // Hide empty ones
+    // Hide empty lists
     for (let i = 0; i < types.length; i++) {
         if(document.querySelector(`#${types[i]}`).innerHTML == ''){
             document.querySelector(`#show_${types[i]}`).classList.add('hidden');
@@ -316,6 +335,9 @@ async function addButtons(){
     }
 }
 
+/**
+ * Subscribe to the entities as defined in the entIds variable
+ */
 window.setupEntitiesSubscription = async () => {
     if (unsubEntities) {
         unsubEntities();
@@ -326,7 +348,7 @@ window.setupEntitiesSubscription = async () => {
     unsubEntities = subscribeEntities(
         window.connection, 
         (entities) => renderEntities(window.connection, entities),
-        entIds
+        Object.values(entIds)
     );
 };
 
@@ -334,6 +356,9 @@ window.setupEntitiesSubscription = async () => {
 setDateTime();
 setInterval(setDateTime, 60000);
 
+/**
+ * Loggin to HA
+ */
 if(typeof(HA_INSTANCE) != 'undefined'){
     console.log('Logging in with long live access token');
 
@@ -349,7 +374,8 @@ if(typeof(HA_INSTANCE) != 'undefined'){
     await authenticate();
 }
 
-console.log('Adding buttons');
+await processEntities();
+
 addButtons();
 
 setupEntitiesSubscription();

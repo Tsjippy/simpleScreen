@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" href="css/main.css?version=1.1.7" >
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@7.4.47/css/materialdesignicons.min.css" >
 
     <title>Temperature monitor</title>
   </head>
@@ -11,6 +12,7 @@
     <div id="container" class="hidden">
         <div class="headwrapper">
             <div id="date" class='grow'></div>
+            <div id="custom" class='grow'></div>
             <div id="clock" class='grow'></div>
             <div id="rain" class='grow' style='display:none'></div>
         </div>
@@ -53,6 +55,11 @@
                     <span class='hum'></span>%
                 </div>
             </div>
+        </div>
+        <div class="footerwrapper">
+            <div id="footer_1" class='grow'></div>
+            <div id="footer_2" class='grow'></div>
+            <div id="footer_3" class='grow'></div>
         </div>
     </div>
 
@@ -105,7 +112,7 @@
     </div>
 
     <script src="js/secrets.js"></script>
-    <script src="js/main.min.js?version=1.1.7"></script>
+    <script src="js/main.min.js?version=1.2.0"></script>
   </body>
 
 </html>
