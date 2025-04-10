@@ -129,12 +129,12 @@ function processEntity(entity, entities){
 
             if(entity.attributes.icon != undefined){
                 let icon    = entity.attributes.icon.replace(':', '-');
-                let color   = '';
+                let style   = '';
                 if(entity.state == 'on'){
-                    color   = 'gold';
+                    style   = `style=color:gold`;
                 }
 
-                content = `<span class="mdi ${icon}" style='${color}'></span>`;
+                content = `<span class="mdi ${icon}" ${style}></span>`;
             }else{
                 content = entity.state;
             }
