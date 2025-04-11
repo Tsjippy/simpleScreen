@@ -8,7 +8,6 @@ import {
     getStates
 } from "home-assistant-js-websocket";
 
-import './secrets.js';
 import './actions.js';
 import {showMediaPlayer} from './media_player.js';
 
