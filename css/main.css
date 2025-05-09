@@ -111,9 +111,10 @@ body{
     font-size:          6em;
     min-height:         100px;
     padding-top:        20px;
-    background-color:   floralwhite;
+    /*background-color:   floralwhite;*/
     font-family:        monospace;
     opacity:            85%;
+    text-shadow: -2px -2px 0 white, 2px -2px 0 white, -2px 2px 0 white, 2px 2px 0 white;
 }
 
 .volume{
