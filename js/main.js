@@ -200,6 +200,12 @@ function setDateTime() {
     if(document.getElementById('date').innerHTML !=  dateString){
         document.getElementById('date').innerHTML =  dateString;
     }
+
+    // refresh the screen once a day
+    if(h == 8 && m == '00'){
+        location.href = location.href;
+    }
+
 }
 
 /**
